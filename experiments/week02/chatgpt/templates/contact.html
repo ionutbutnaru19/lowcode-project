@@ -1,0 +1,62 @@
+<CodeBlock language="html" editable>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form</title>
+</head>
+<body>
+
+
+<h1>Contact Us</h1>
+
+{% if error %}
+<p style="color: red;">{{ error }}</p>
+{% endif %}
+
+<form method="POST" action="/contact">
+
+<div>
+<label for="name">Name:</label>
+<input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ name }}"
+            >
+</div>
+
+<br>
+
+<div>
+<label for="email">Email:</label>
+<input
+                type="text"
+                id="email"
+                name="email"
+                value="{{ email }}"
+            >
+</div>
+
+<br>
+
+<div>
+<label for="message">Message:</label>
+<textarea
+                id="message"
+                name="message"
+                rows="5"
+                cols="30"
+            >{{ message }}</textarea>
+</div>
+
+<br>
+
+<button type="submit">Send Message</button>
+
+</form>
+
+</body>
+</html>
+</CodeBlock>
