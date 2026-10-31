@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 2rem auto; padding: 0 1rem; }
+        label { display: block; margin-top: 1rem; font-weight: 600; }
+        input, textarea { width: 100%; padding: 0.5rem; box-sizing: border-box; font: inherit; }
+        .error { color: #b00020; margin: 0.25rem 0 0; font-size: 0.9rem; }
+        .banner { background: #fdecea; border: 1px solid #b00020; color: #b00020; padding: 0.75rem; border-radius: 4px; }
+        button { margin-top: 1.5rem; padding: 0.6rem 1.2rem; font: inherit; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Contact us</h1>
+
+    {% if errors %}
+        <p class="banner" role="alert">Please fix the errors below and try again.</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('contact') }}" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="{{ form.get('name', '') }}"
+               maxlength="100" required>
+        {% if errors.get('name') %}<p class="error">{{ errors['name'] }}</p>{% endif %}
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ form.get('email', '') }}"
+               maxlength="254" required>
+        {% if errors.get('email') %}<p class="error">{{ errors['email'] }}</p>{% endif %}
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" maxlength="5000" required>{{ form.get('message', '') }}</textarea>
+        {% if errors.get('message') %}<p class="error">{{ errors['message'] }}</p>{% endif %}
+
+        <button type="submit">Send</button>
+    </form>
+</body>
+</html>
