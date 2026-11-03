@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+clienthub.db
+uploads/*
+!uploads/.gitkeep
+emails/*
+!emails/.gitkeep
+.env

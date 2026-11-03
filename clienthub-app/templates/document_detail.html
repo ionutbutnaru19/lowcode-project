@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}
+<div class="bg-white rounded-xl shadow p-6 max-w-2xl"><h1 class="text-2xl font-bold mb-4">Document details</h1>
+<dl class="space-y-2"><dt class="font-semibold">File</dt><dd>{{ document.original_filename }}</dd><dt class="font-semibold">Customer</dt><dd>{{ document.customer.company }}</dd><dt class="font-semibold">Review status</dt><dd>{{ document.review_status|replace('_',' ') }}</dd><dt class="font-semibold">Uploaded</dt><dd>{{ document.uploaded_at }}</dd><dt class="font-semibold">Review reason</dt><dd>{{ document.review_reason or '—' }}</dd></dl>
+<a class="inline-block mt-5 text-blue-700 underline" href="{{ url_for('document_download', document_id=document.id) }}">Download file</a>
+</div>{% endblock %}

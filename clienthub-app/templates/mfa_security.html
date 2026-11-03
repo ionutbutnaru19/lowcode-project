@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<h1 class="text-3xl font-bold mb-5">MFA security</h1>
+<div class="bg-white rounded-xl shadow p-6 max-w-2xl space-y-4">
+<p>Multi-factor authentication is required for every account. Add this account to an authenticator app using the secret or provisioning URI below.</p>
+<div><strong>Account:</strong> {{ current_user.email }}</div>
+<div><strong>Authenticator secret:</strong> <code class="break-all">{{ secret }}</code></div>
+<div><strong>Provisioning URI:</strong><code class="block break-all bg-slate-100 p-3 mt-1">{{ provisioning_uri }}</code></div>
+<p class="text-sm text-slate-600">The current code is shown for local demonstration only: <strong>{{ current_code }}</strong>. In a production system, secrets and provisioning details should not be displayed after initial setup.</p>
+</div>{% endblock %}

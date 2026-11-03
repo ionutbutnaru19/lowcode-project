@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<h1 class="text-3xl font-bold mb-5">{{ 'Edit' if customer else 'Create' }} customer</h1>
+<form method="post" class="bg-white rounded-xl shadow p-6 max-w-xl space-y-4">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label class="block">Name<input class="w-full border rounded p-2 mt-1" name="name" required value="{{ customer.name if customer else '' }}"></label>
+<label class="block">Email<input class="w-full border rounded p-2 mt-1" type="email" name="email" required value="{{ customer.email if customer else '' }}"></label>
+<label class="block">Company<input class="w-full border rounded p-2 mt-1" name="company" required value="{{ customer.company if customer else '' }}"></label>
+<label class="block">{{ 'New password (leave blank to keep current)' if customer else 'Temporary password' }}<input class="w-full border rounded p-2 mt-1" type="password" name="password" {% if not customer %}required{% endif %}></label>
+<button class="bg-blue-700 text-white rounded px-4 py-2">Save</button></form>{% endblock %}
