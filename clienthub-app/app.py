@@ -298,7 +298,7 @@ def create_app(test_config=None):
     @login_required
     def request_complete(request_id):
         item = db.get_or_404(DocumentRequest, request_id)
-        if current_user.role != "admin" and item.customer_id != current_user.id:
+        if current_user.role != "admin":
             abort(403)
         item.status = "complete" if item.status == "open" else "open"
         db.session.commit()
