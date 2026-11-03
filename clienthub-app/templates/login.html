@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Sign in · ClientHub{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow p-7">
+  <h1 class="text-2xl font-bold mb-5">Sign in</h1>
+  <form method="post" class="space-y-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="block">Email<input class="w-full border rounded p-2 mt-1" type="email" name="email" required></label>
+    <label class="block">Password<input class="w-full border rounded p-2 mt-1" type="password" name="password" required></label>
+    <button class="bg-blue-700 text-white rounded px-4 py-2" type="submit">Continue</button>
+  </form>
+</div>{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<div class="bg-white rounded-xl shadow p-6"><h1 class="text-3xl font-bold">{{ item.title }}</h1><p class="text-slate-600 mt-2">{{ item.customer.company }} · {{ item.status }}</p><p class="my-5 whitespace-pre-wrap">{{ item.description or 'No additional instructions.' }}</p>
+{% if current_user.role == 'admin' or item.customer_id == current_user.id %}
+<form method="post" action="{{ url_for('request_complete', request_id=item.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="border rounded px-3 py-2">Mark {{ 'open' if item.status == 'complete' else 'complete' }}</button></form>
+{% endif %}
+<h2 class="text-xl font-semibold mt-6 mb-2">Documents for this request</h2>
+{% for doc in item.documents %}<p><a class="text-blue-700 underline" href="{{ url_for('document_detail', document_id=doc.id) }}">{{ doc.original_filename }}</a> — {{ doc.review_status }}</p>{% else %}<p>No documents uploaded for this request.</p>{% endfor %}
+{% if current_user.role == 'customer' %}<a class="inline-block mt-4 text-blue-700 underline" href="{{ url_for('document_upload') }}">Upload documents</a>{% endif %}
+</div>{% endblock %}

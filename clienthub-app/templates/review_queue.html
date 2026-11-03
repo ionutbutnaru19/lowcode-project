@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block content %}
+<h1 class="text-3xl font-bold mb-5">Document review queue</h1>
+{% for doc in pending %}
+<div class="bg-white rounded-xl shadow p-5 mb-4"><h2 class="text-xl font-semibold">{{ doc.original_filename }}</h2><p class="text-slate-600 mb-3">{{ doc.customer.company }} · uploaded {{ doc.uploaded_at }}</p>
+<a class="text-blue-700 underline" href="{{ url_for('document_detail', document_id=doc.id) }}">View document details</a>
+<form method="post" action="{{ url_for('review_document', document_id=doc.id) }}" class="mt-4 grid gap-3">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Decision<select class="border rounded p-2 block w-full" name="decision"><option value="approved">Approve</option><option value="rejected">Reject</option><option value="replacement_requested">Request replacement</option></select></label>
+<label>Reason (required for reject/replacement)<textarea class="border rounded p-2 block w-full" name="reason" rows="2"></textarea></label>
+<button class="bg-blue-700 text-white rounded px-4 py-2 justify-self-start">Save review</button></form></div>
+{% else %}<p class="bg-white rounded-xl p-5">No documents are waiting for review.</p>{% endfor %}{% endblock %}
