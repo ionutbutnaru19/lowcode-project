@@ -434,9 +434,9 @@ def create_app(test_config=None):
         db.create_all()
         if not User.query.filter_by(email="admin@clienthub.local").first():
             demo_users = [
-                ("ClientHub Admin", "admin@clienthub.local", "ClientHub", "admin",
+                ("ClientHub Accountant", "admin@clienthub.local", "ClientHub Accounting Services", "admin",
                  "AdminDemo!2026", "JBSWY3DPEHPK3PXP"),
-                ("Alice Customer", "alice@example.local", "Alice Accounting Ltd", "customer",
+                ("Alice Customer", "alice@example.local", "Alice Design Studio Ltd", "customer",
                  "AliceDemo!2026", "KRSXG5DSNFXGOIDB"),
                 ("Ben Customer", "ben@example.local", "Ben Services Ltd", "customer",
                  "BenDemo!2026", "MFRGGZDFMZTWQ2LK"),
