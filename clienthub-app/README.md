@@ -19,26 +19,78 @@ A Flask proof-of-concept portal for an accountant and two customer firms to exch
 
 ## Technology
 
-Python 3.12 recommended, Flask 3.x, Flask-SQLAlchemy, Flask-Login, Flask-WTF/CSRF, Jinja2, Tailwind CSS, SQLite, PyOTP and APScheduler.
+Python 3.12 or newer, Flask 3.x, Flask-SQLAlchemy, Flask-Login, Flask-WTF/CSRF, Jinja2, Tailwind CSS, SQLite, PyOTP and APScheduler.
 
-## Setup (Git Bash on Windows)
+## Setup and installation
 
-Open Git Bash in the project folder:
+### 1. Get the project
+
+Clone the repository using HTTPS:
+
+```bash
+git clone https://github.com/ionutbutnaru19/lowcode-project.git
+cd lowcode-project/clienthub-app
+```
+
+Alternatively, download the repository as a ZIP file from GitHub, extract it, and open a terminal inside the `clienthub-app` folder.
+
+### 2. Create and activate a virtual environment
+
+For Windows Git Bash:
 
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-flask --app app init-db
-flask --app app run --debug
 ```
 
-Open <http://127.0.0.1:5000>.
+For Windows PowerShell:
 
-If you have an older database from a previous ClientHub version, back it up first. This updated version changes database column names to match the specification. For a disposable demo database, stop Flask, delete `clienthub.db`, then run `flask --app app init-db` again. Do not delete a database containing data you need.
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+For macOS/Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install the application dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 4. Initialise the database
+
+```bash
+flask --app app init-db
+```
+
+This creates the database tables and initial demonstration accounts.
+
+A fresh clone does not include a database because database files are excluded from Git.
+
+**Important:** This command does not migrate an existing database. If you have an older database from a previous ClientHub version, back it up first. If it contains only disposable demonstration data, stop the application, delete `clienthub.db`, and run the initialisation command again. Do not delete a database containing data you need.
+
+### 5. Start the application
+
+```bash
+python app.py
+```
+
+Open the following address in your browser:
+
+<http://127.0.0.1:5000>
+
+To stop the application, press `Ctrl+C` in the terminal.
 
 ## Demonstration accounts
+
+The following accounts are created during database initialisation:
 
 | Role | Email | Password |
 |---|---|---|
@@ -46,47 +98,88 @@ If you have an older database from a previous ClientHub version, back it up firs
 | Customer 1 | `alice@example.local` | `AliceDemo!2026` |
 | Customer 2 | `ben@example.local` | `BenDemo!2026` |
 
-After the database is initialized, run:
+These credentials are for demonstration purposes only and must not be reused for real accounts.
+
+### Multi-factor authentication
+
+After initialising the database, open a second terminal, navigate to the `clienthub-app` folder, activate the virtual environment, and run:
 
 ```bash
 flask --app app show-demo-codes
 ```
 
-Enter the current six-digit code for the account after password login. Codes change every 30 seconds. For a real account, use the MFA security page to add the displayed secret/provisioning URI to an authenticator app.
+Enter the current six-digit code for the relevant account after password login.
+
+Codes change every 30 seconds. For a real account, use the MFA security page to add the displayed secret or provisioning URI to an authenticator app.
 
 ## Retention cleanup
 
-Default retention is six years (`RETENTION_DAYS=2190`). For a short demonstration window, set `RETENTION_MINUTES` before starting the app, for example:
+The default document retention period is six years (`RETENTION_DAYS=2190`).
+
+For a short demonstration window, you can set `RETENTION_MINUTES` before running the cleanup command.
+
+For Windows Git Bash, macOS or Linux:
 
 ```bash
 export RETENTION_MINUTES=5
 flask --app app cleanup-documents
 ```
 
-This will delete uploaded documents older than five minutes. Use only with disposable demo data. The scheduled process can be run separately in another terminal:
+For Windows PowerShell:
+
+```powershell
+$env:RETENTION_MINUTES = "5"
+flask --app app cleanup-documents
+```
+
+This deletes uploaded documents older than five minutes. Use this setting only with disposable demonstration data.
+
+The scheduled process can be run separately in another terminal:
 
 ```bash
 flask --app app run-retention-scheduler
 ```
 
-The scheduler runs nightly at 02:00 local server time. Run it as a separate process rather than starting multiple schedulers inside web workers.
+The scheduler runs nightly at 02:00 local server time. It must be started separately and kept running for scheduled cleanup to take place. Run it as a separate process rather than starting multiple schedulers inside web workers.
 
-## Tests and code quality
+## Running the tests
 
-```bash
-pip install -r requirements-dev.txt
-pytest
-ruff check .
-bandit -r app.py
-pip-audit
-```
-
-Semgrep is optional and can be run with:
+Install the development dependencies:
 
 ```bash
-semgrep scan --config auto .
+python -m pip install -r requirements-dev.txt
 ```
+
+Run the automated tests:
+
+```bash
+python -m pytest
+```
+
+The tests check key application functionality, including authentication, access permissions and document handling.
+
+## Local files and database
+
+The following are created or used locally and are not committed to Git:
+
+- `clienthub.db` – SQLite database.
+- `uploads/` – uploaded document files.
+- `emails/` – locally generated email notification files.
+- `.venv/` – Python virtual environment.
+
+The application creates the upload and email directories when needed. The database must be initialised using the command described above.
 
 ## Important limitations
 
-This is coursework/demo software, not a production service. Before real use, add HTTPS, secure secret management, stronger MFA enrolment/recovery, malware scanning, content-based file validation, rate limiting, audit logging, PostgreSQL migrations, object storage, backups, monitoring and a security review. The default development secret key must be replaced. Tailwind is loaded from its CDN. No real emails are sent and no customer data should be uploaded.
+This is coursework/demo software, not a production service.
+
+Before real-world use, it would need additional security and operational improvements, including:
+
+- HTTPS and secure secret management.
+- Stronger MFA enrolment and recovery.
+- Malware scanning and content-based file validation.
+- Rate limiting and audit logging.
+- PostgreSQL migrations, object storage and backups.
+- Monitoring and a full security review.
+
+The default development secret key must be replaced before deployment. Tailwind CSS is loaded from its CDN. No real emails are sent, and no real customer data should be uploaded.
