@@ -82,6 +82,10 @@ def create_app(test_config=None):
         EMAIL_FOLDER=str(BASE_DIR / "emails"),
         RETENTION_DAYS=int(os.environ.get("RETENTION_DAYS", "2190")),
         RETENTION_MINUTES=int(os.environ.get("RETENTION_MINUTES", "0")),
+        GOOGLE_FORM_URL=os.environ.get(
+            "GOOGLE_FORM_URL",
+            "https://docs.google.com/forms/d/e/1FAIpQLSfnv_p_rJF-N3bgvqAMBrVjGMVyWidyoNgqIQ00-bLS9NAG2A/viewform?usp=header",
+        ).strip(),
     )
     if test_config:
         app.config.update(test_config)
@@ -131,9 +135,20 @@ def create_app(test_config=None):
         return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
     @app.get("/")
-    @login_required
     def index():
-        return redirect(url_for("dashboard"))
+        if current_user.is_authenticated:
+            return redirect(url_for("dashboard"))
+        return render_template(
+            "home.html",
+            google_form_url=app.config.get("GOOGLE_FORM_URL", ""),
+        )
+
+    @app.get("/submit-details")
+    def submit_details():
+        form_url = app.config.get("GOOGLE_FORM_URL", "")
+        if form_url:
+            return redirect(form_url)
+        return render_template("form_setup.html")
 
     @app.get("/dashboard")
     @login_required

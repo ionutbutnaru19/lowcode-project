@@ -124,3 +124,26 @@ def test_admin_can_edit_customer(client, app):
     assert response.status_code == 302
     with app.app_context():
         assert db.session.get(User, alice_id).company == "Alice Updated Ltd"
+
+
+def test_public_homepage_offers_login_and_form_configuration(client, app):
+    app.config["GOOGLE_FORM_URL"] = "https://docs.google.com/forms/d/e/example/viewform"
+    response = client.get("/")
+    assert response.status_code == 200
+    assert b"ClientHub Accounting Services" in response.data
+    assert b"I am already a customer" in response.data
+    assert b"Submit your details" in response.data
+    assert b'href="/login"' in response.data
+    assert b'href="/submit-details"' in response.data
+    form_response = client.get("/submit-details")
+    assert form_response.status_code == 302
+    assert form_response.headers["Location"] == "https://docs.google.com/forms/d/e/example/viewform"
+
+
+def test_public_homepage_shows_setup_message_without_form_url(client):
+    response = client.get("/")
+    assert response.status_code == 200
+    assert b'href="/submit-details"' in response.data
+    form_response = client.get("/submit-details")
+    assert form_response.status_code == 200
+    assert b"form is not connected yet" in form_response.data

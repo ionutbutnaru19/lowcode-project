@@ -9,7 +9,7 @@
 <body class="bg-slate-100 text-slate-900 min-h-screen">
   <header class="bg-slate-900 text-white">
     <nav class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap gap-4 items-center">
-      <a class="font-bold text-xl mr-auto" href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('login') }}">ClientHub Accounting Services</a>
+      <a class="font-bold text-xl mr-auto" href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}">ClientHub Accounting Services</a>
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
         <a href="{{ url_for('requests_list') }}">Requests</a>
