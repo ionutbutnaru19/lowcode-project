@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Submit your details · ClientHub Accounting Services{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto my-10 bg-white rounded-2xl border border-slate-200 shadow-sm p-7 sm:p-10">
+  <h1 class="text-2xl font-bold text-slate-900 mb-3">Submit your details</h1>
+  <p class="text-slate-600 leading-relaxed mb-4">The prospective-client form is not connected yet. Please contact ClientHub Accounting Services for assistance, or try again once the form link has been configured.</p>
+  <p class="text-sm text-slate-500 mb-7">An accountant will review submitted details before deciding whether an account can be created.</p>
+  <a href="{{ url_for('index') }}" class="inline-flex rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-semibold px-5 py-3">Back to homepage</a>
+</section>
+{% endblock %}
