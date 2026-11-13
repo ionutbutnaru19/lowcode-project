@@ -1,11 +1,179 @@
-{% extends "base.html" %}{% block content %}
-<h1 class="text-3xl font-bold mb-5">Accountant Dashboard</h1>
-<div class="grid md:grid-cols-2 gap-5">
-<section class="bg-white rounded-xl p-5 shadow"><h2 class="text-xl font-semibold mb-3">Pending document reviews</h2>
-{% if pending %}<ul class="space-y-2">{% for doc in pending %}<li><a class="text-blue-700 underline" href="{{ url_for('document_detail', document_id=doc.id) }}">{{ doc.original_filename }}</a> — {{ doc.customer.company }}</li>{% endfor %}</ul>
-{% else %}<p>No documents waiting for review.</p>{% endif %}
-<a class="inline-block mt-4 text-blue-700 underline" href="{{ url_for('review_queue') }}">Open review queue</a></section>
-<section class="bg-white rounded-xl p-5 shadow"><h2 class="text-xl font-semibold mb-3">Customer firms</h2>
-<ul class="space-y-2">{% for customer in customers %}<li>{{ customer.company }} — {{ customer.email }}</li>{% else %}<li>No customers yet.</li>{% endfor %}</ul>
-<a class="inline-block mt-4 text-blue-700 underline" href="{{ url_for('customer_new') }}">Create customer account</a></section>
-</div>{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}Accountant Dashboard - ClientHub{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <h1 class="text-3xl font-bold mb-5">
+        Accountant Dashboard
+    </h1>
+
+    <div class="grid md:grid-cols-2 gap-5">
+
+        <!-- Pending document reviews -->
+        <section class="bg-white rounded-xl p-5 shadow">
+
+            <h2 class="text-xl font-semibold mb-3">
+                Pending document reviews
+            </h2>
+
+            {% if pending %}
+                <ul class="space-y-3">
+                    {% for doc in pending %}
+                        <li class="border-b border-gray-100 pb-3">
+                            <a
+                                class="text-blue-700 underline font-medium"
+                                href="{{ url_for('document_detail', document_id=doc.id) }}"
+                            >
+                                {{ doc.original_filename }}
+                            </a>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                {{ doc.customer.company or doc.customer.name }}
+                            </p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-sm text-gray-500">
+                    No documents waiting for review.
+                </p>
+            {% endif %}
+
+            <a
+                class="inline-block mt-4 text-blue-700 underline"
+                href="{{ url_for('review_queue') }}"
+            >
+                Open review queue
+            </a>
+
+        </section>
+
+        <!-- Customer firms -->
+        <section class="bg-white rounded-xl p-5 shadow">
+
+            <h2 class="text-xl font-semibold mb-3">
+                Customer accounts
+            </h2>
+
+            <ul class="space-y-2">
+                {% for customer in customers %}
+                    <li>
+                        {{ customer.company or customer.name }}
+                        — {{ customer.email }}
+                    </li>
+                {% else %}
+                    <li>No customers yet.</li>
+                {% endfor %}
+            </ul>
+
+            <a
+                class="inline-block mt-4 text-blue-700 underline"
+                href="{{ url_for('customer_new') }}"
+            >
+                Create customer account
+            </a>
+
+        </section>
+
+    </div>
+
+    <!-- All customer documents -->
+    <section class="bg-white rounded-xl p-5 shadow">
+
+        <h2 class="text-xl font-semibold mb-4">
+            All customer documents
+        </h2>
+
+        {% if documents %}
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-sm text-left">
+
+                    <thead class="border-b border-gray-200 text-gray-500">
+                        <tr>
+                            <th class="py-3 pr-4">Document</th>
+                            <th class="py-3 pr-4">Customer</th>
+                            <th class="py-3 pr-4">Uploaded</th>
+                            <th class="py-3 pr-4">Status</th>
+                            <th class="py-3">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+
+                        {% for doc in documents %}
+                            <tr>
+
+                                <td class="py-3 pr-4 font-medium text-gray-900">
+                                    {{ doc.original_filename }}
+                                </td>
+
+                                <td class="py-3 pr-4">
+                                    {{ doc.customer.company or doc.customer.name }}
+                                </td>
+
+                                <td class="py-3 pr-4 text-gray-500">
+                                    {{ doc.uploaded_at.strftime("%d/%m/%Y") }}
+                                </td>
+
+                                <td class="py-3 pr-4">
+
+                                    {% if doc.review_status == "approved" %}
+                                        <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                            Approved
+                                        </span>
+
+                                    {% elif doc.review_status == "rejected" %}
+                                        <span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
+                                            Rejected
+                                        </span>
+
+                                    {% elif doc.review_status == "replacement_requested" %}
+                                        <span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                            Replacement requested
+                                        </span>
+
+                                    {% else %}
+                                        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                            Pending
+                                        </span>
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="py-3">
+                                    <a
+                                        href="{{ url_for('document_detail', document_id=doc.id) }}"
+                                        class="text-blue-700 underline font-medium"
+                                    >
+                                        View document
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="text-sm text-gray-500">
+                No documents have been uploaded yet.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

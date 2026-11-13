@@ -1,7 +1,25 @@
 {% extends "base.html" %}{% block content %}
-<h1 class="text-3xl font-bold mb-2">Upload documents</h1><p class="text-slate-600 mb-5">Allowed: JPG, PNG, HEIC, PDF, XLSX, CSV and DOCX. You can select multiple files.</p>
+<h1 class="text-3xl font-bold mb-2">Upload documents</h1>
+<p class="text-slate-600 mb-5">Allowed: JPG, PNG, HEIC, PDF, XLSX, CSV and DOCX. You can select multiple files.</p>
 <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 max-w-xl space-y-4">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<label class="block">Link to a request (optional)<select class="w-full border rounded p-2 mt-1" name="request_id"><option value="">No request</option>{% for item in requests_for_customer %}<option value="{{ item.id }}">{{ item.title }}</option>{% endfor %}</select></label>
-<label class="block">Files<input class="w-full border rounded p-2 mt-1" type="file" name="files" multiple required accept=".jpg,.jpeg,.png,.heic,.pdf,.xlsx,.csv,.docx"></label>
-<button class="bg-blue-700 text-white rounded px-4 py-2">Upload</button></form>{% endblock %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="block">
+        Link to a request (optional)
+        <select class="w-full border rounded p-2 mt-1" name="request_id">
+            <option value="">No request</option>
+            {% for item in requests_for_customer %}
+                <option value="{{ item.id }}">{{ item.title }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label class="block">
+        Description (optional)
+        <textarea class="w-full border rounded p-2 mt-1" name="description" rows="3" placeholder="Add any details that will help your accountant understand these files."></textarea>
+    </label>
+    <label class="block">
+        Files
+        <input class="w-full border rounded p-2 mt-1" type="file" name="files" multiple required accept=".jpg,.jpeg,.png,.heic,.pdf,.xlsx,.csv,.docx">
+    </label>
+    <button class="bg-blue-700 text-white rounded px-4 py-2">Upload</button>
+</form>
+{% endblock %}

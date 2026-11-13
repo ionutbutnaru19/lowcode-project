@@ -8,8 +8,8 @@ import click
 import pyotp
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import (
-    Flask, abort, flash, redirect, render_template, request, send_from_directory,
-    url_for,
+    Flask, abort, flash, redirect, render_template, request, send_file,
+    send_from_directory, url_for,
 )
 from flask_login import (
     LoginManager, UserMixin, current_user, login_required, login_user, logout_user,
@@ -61,6 +61,7 @@ class Document(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     request_id = db.Column(db.Integer, db.ForeignKey("document_request.id"), nullable=True)
     original_filename = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
     stored_filename = db.Column(db.String(255), unique=True, nullable=False)
     review_status = db.Column(db.String(30), nullable=False, default="pending")
     review_reason = db.Column(db.Text, nullable=True)
@@ -138,10 +139,12 @@ def create_app(test_config=None):
     def index():
         if current_user.is_authenticated:
             return redirect(url_for("dashboard"))
+
         return render_template(
             "home.html",
             google_form_url=app.config.get("GOOGLE_FORM_URL", ""),
         )
+
 
     @app.get("/submit-details")
     def submit_details():
@@ -150,16 +153,28 @@ def create_app(test_config=None):
             return redirect(form_url)
         return render_template("form_setup.html")
 
+
     @app.get("/dashboard")
     @login_required
     def dashboard():
         if current_user.role == "admin":
-            pending = Document.query.filter_by(review_status="pending").order_by(
-                Document.uploaded_at.asc()
+            pending = Document.query.filter_by(
+                review_status="pending"
+            ).order_by(Document.uploaded_at.asc()).all()
+
+            documents = Document.query.order_by(
+                Document.uploaded_at.desc()
             ).all()
-            customers = User.query.filter_by(role="customer").order_by(User.name).all()
+
+            customers = User.query.filter_by(
+                role="customer"
+            ).order_by(User.name).all()
+
             return render_template(
-                "admin_dashboard.html", pending=pending, customers=customers
+                "admin_dashboard.html",
+                pending=pending,
+                documents=documents,
+                customers=customers,
             )
 
         requests_list = DocumentRequest.query.filter_by(
@@ -175,6 +190,7 @@ def create_app(test_config=None):
             requests_list=requests_list,
             documents=documents,
         )
+
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -424,6 +440,7 @@ def create_app(test_config=None):
             ]
 
             request_id = request.form.get("request_id", type=int)
+            description = request.form.get("description", "").strip() or None
             linked_request = None
 
             if request_id:
@@ -477,6 +494,7 @@ def create_app(test_config=None):
                             linked_request.id if linked_request else None
                         ),
                         original_filename=original,
+                        description=description,
                         stored_filename=stored,
                         review_status="pending",
                     )
@@ -527,6 +545,35 @@ def create_app(test_config=None):
             as_attachment=True,
             download_name=document.original_filename,
         )
+    @app.get("/documents/<int:document_id>/preview")
+    @login_required
+    def document_preview(document_id):
+        document = db.get_or_404(Document, document_id)
+
+        if not can_access_document(document):
+            abort(403)
+
+        extension = document.original_filename.rsplit(".", 1)[-1].lower()
+
+        preview_types = {
+            "pdf": "application/pdf",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "png": "image/png",
+        }
+
+        mimetype = preview_types.get(extension)
+
+        if not mimetype:
+            abort(415)
+
+        return send_file(
+            Path(app.config["UPLOAD_FOLDER"]) / document.stored_filename,
+            mimetype=mimetype,
+            as_attachment=False,
+            download_name=document.original_filename,
+            conditional=True,
+        )
 
     @app.get("/admin/review")
     @login_required
@@ -545,8 +592,18 @@ def create_app(test_config=None):
         admin_required()
         document = db.get_or_404(Document, document_id)
 
-        decision = request.form.get("decision", "")
+        # Prevent reviewing a document more than once.
+        if document.review_status != "pending":
+            flash("This document has already been reviewed.", "error")
+            return redirect(
+                url_for("document_detail", document_id=document.id)
+            )
+
+        decision = request.form.get("decision", "").strip()
         reason = request.form.get("reason", "").strip()
+        return_to = request.form.get("return_to", "queue")
+        if return_to not in {"queue", "detail"}:
+            return_to = "queue"
 
         if decision not in {"approved", "rejected", "replacement_requested"}:
             abort(400)
@@ -556,6 +613,10 @@ def create_app(test_config=None):
                 "A reason is required when rejecting or requesting a replacement.",
                 "error",
             )
+            if return_to == "detail":
+                return redirect(
+                    url_for("document_detail", document_id=document.id)
+                )
             return redirect(url_for("review_queue"))
 
         document.review_status = decision
@@ -573,7 +634,14 @@ def create_app(test_config=None):
         )
 
         flash("Review saved and simulated email created.", "success")
+
+        if return_to == "detail":
+            return redirect(
+                url_for("document_detail", document_id=document.id)
+            )
+
         return redirect(url_for("review_queue"))
+
 
     @app.get("/account/security/mfa")
     @login_required
