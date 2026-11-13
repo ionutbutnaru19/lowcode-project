@@ -9,9 +9,11 @@ A Flask proof-of-concept portal for an accountant and two customer firms to exch
 - Admin can create and edit customer accounts.
 - Admin can create document requests for a customer.
 - Customers can view their own requests and upload one or multiple files, with or without a request.
+- Customers can add an optional description when uploading documents.
 - Admin has a separate document review queue and can approve, reject, or request a replacement.
 - A reason is required for rejection and replacement requests.
-- Customers and admins can view permitted document details and download files.
+- Customers and admins can view permitted document details, preview supported PDF, JPG, JPEG and PNG files in the browser, and download documents.
+- Admins can view all customer documents, including pending, approved, rejected and replacement-requested documents.
 - Customer ownership checks are enforced on request and document routes.
 - Uploads use random stored filenames and an extension allowlist.
 - Notifications are saved as local `.eml` files; no real email is sent.
@@ -20,6 +22,19 @@ A Flask proof-of-concept portal for an accountant and two customer firms to exch
 ## Technology
 
 Python 3.12 or newer, Flask 3.x, Flask-SQLAlchemy, Flask-Login, Flask-WTF/CSRF, Jinja2, Tailwind CSS, SQLite, PyOTP and APScheduler.
+
+## Public welcome homepage
+
+The public homepage is available at `/` without signing in. It is branded **ClientHub Accounting Services** and provides two entry points:
+
+- **I am already a customer** opens the existing `/login` route (password and MFA flow unchanged).
+- **Submit your details** opens a portal route that redirects to the configured prospective-client Google Form.
+
+The actual Google Form URL is already configured as the application's default, so no additional configuration is required for the current form.
+
+If the Google Form changes, you can override the default URL using the GOOGLE_FORM_URL environment variable.
+
+An accountant reviews submissions separately; this portal does not automatically create customer accounts from the form.
 
 ## Setup and installation
 
@@ -183,32 +198,3 @@ Before real-world use, it would need additional security and operational improve
 - Monitoring and a full security review.
 
 The default development secret key must be replaced before deployment. Tailwind CSS is loaded from its CDN. No real emails are sent, and no real customer data should be uploaded.
-
-
-## Public welcome homepage
-
-The public homepage is available at `/` without signing in. It is branded **ClientHub Accounting Services** and provides two entry points:
-
-- **I am already a customer** opens the existing `/login` route (password and MFA flow unchanged).
-- **Submit your details** opens a portal route that redirects to the configured prospective-client Google Form. If the URL has not yet been configured, visitors see a clear setup notice. An accountant reviews submissions separately; this portal does not automatically create accounts from the form.
-
-Configure the actual Google Form URL before deployment:
-
-For Windows PowerShell:
-
-```powershell
-$env:GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform"
-python app.py
-```
-
-For macOS/Linux:
-
-```bash
-export GOOGLE_FORM_URL="https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform"
-python app.py
-```
-
-If `GOOGLE_FORM_URL` is not configured, the homepage displays a setup notice rather than sending customers to a generic or incorrect form.
-
-
-The supplied Google Form URL is configured as the default, so the **Submit your details** link is ready to use without additional setup. You can still override it with the `GOOGLE_FORM_URL` environment variable if the form changes.
